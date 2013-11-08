@@ -4,6 +4,8 @@ namespace TDDMicroExercises\PHP\UnicodeFileToHtmlTextConverter;
 
 class UnicodeFileToHtmlTextConverter
 {
+    private $_filePointer;
+    private $_html;
     private $_fullFilenameWithPath;
 
     public function __construct($fullFilenameWithPath)
@@ -13,17 +15,38 @@ class UnicodeFileToHtmlTextConverter
 
     public function convertToHtml()
     {
-        $unicodeFileStrem = fopen($this->_fullFilenameWithPath, 'r+');
-        $html = '';
+        if ($this->fileIsReadable()) {
 
-        while ( $line = fgets($unicodeFileStrem))
-        {
-            $html .= htmlentities($line);
-            $html .= "<br />";
+            $this->_html = '';
+
+            $this->_filePointer = $this->openFile();
+
+            while ( $line = fgets($this->_filePointer))
+            {
+                $this->_html .= htmlentities($line);
+                $this->_html .= "<br />";
+            }
+
+            fclose($this->_filePointer);
+
+            return $this->_html;
         }
 
-        fclose($unicodeFileStrem);
-
-        return $html;
+        throw new \Exception("Cannot open file");
     }
+
+    private function openFile()
+    {
+        return fopen($this->_fullFilenameWithPath, 'r+');
+    }
+
+    public function fileIsReadable()
+    {
+        if (false !== $this->openFile())  {
+            return true;
+        }
+        return false;
+    }
+
 }
+
